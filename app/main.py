@@ -1,22 +1,28 @@
 from typing import Optional
 from fastapi import FastAPI, status, Response
 from pydantic import BaseModel, Field
-
+from app.response_model import res
+from app.cookies import cookie
+from app.headers import head
 app = FastAPI(title="First App", description="Build app for learning purpose")
 
+app.include_router(res, prefix="/response", tags=["Response"])
+app.include_router(cookie, prefix="/auth", tags=["Cookie"])
+app.include_router(head, prefix="/header", tags=["Header"])
 
 #! uvicorn app.main:app --reload
 @app.get("/")
 def hello():
-
     return {"message": "hello world"}
 
 
+# path parameter
 @app.get("/user/{user_id}")
 def get_user(user_id: int):  # user_id:int for validation of input parameter as integer
     return {"user_id": user_id}
 
 
+# path+query parameter
 @app.get("/users/{userId}")
 def get_user(userId: int, active: bool = True):
     # /users/345?active=true
@@ -33,8 +39,12 @@ class Address(BaseModel):
 class User(BaseModel):
     name: str = Field(
         min_length=3, max_length=50, description="Name of the user", example="John Doe"
+    )  # Field is used to add validation and metadata to the name field, such as minimum and maximum length, description, and example value
+    email: str = Field(
+        pattern=r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+        description="Email of the user",
+        example="john.doe@example.com",
     )
-    email: str
     phone: list[int]
     address: Address
     marks: dict[str, float]  # marks is a dictionary with string keys and float values
@@ -61,30 +71,3 @@ def create_user(user: User):
 # status.HTTP_404_NOT_FOUND
 # status.HTTP_422_UNPROCESSABLE_ENTITY
 # status.HTTP_500_INTERNAL_SERVER_ERROR
-
-
-@app.get("/header")
-def header(response: Response):
-    # use of header: rate limiting, versioning, authentication, etc.
-    response.headers["X-App-Version"] = "1.1110"
-    return {"message": "Header Added"}
-
-
-@app.get("/login")
-def login(response: Response):
-    # use of cookie: session management, personalization, tracking, etc.
-    response.set_cookie(
-        key="token",
-        value="Rahul",
-        max_age=3600,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-    )
-    return {"message": "Cookie Added"}
-
-
-@app.get("/logout")
-def logout(response: Response):
-    response.delete_cookie(key="token")
-    return {"message": "Logged Out"}
