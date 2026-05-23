@@ -7,25 +7,25 @@ from fastapi.responses import (
     FileResponse,
     JSONResponse,
 )
-res = APIRouter()
+router = APIRouter()
 
 
-@res.get("/plain")
+@router.get("/plain")
 def get():
     return Response(content="hello", media_type="text/plain")
 
 
-@res.get("/html")
+@router.get("/html")
 def html():
     return HTMLResponse("""<h1>Welcome</h1><p>FastAPI HTML Response</p>""")
 
 
-@res.get("/plaintext")
+@router.get("/plaintext")
 def plainText():
     return PlainTextResponse("hello")
 
 
-@res.get("/redirect")
+@router.get("/redirect")
 def redirect():
     return RedirectResponse("https://atuljadhav.tech")
 
@@ -35,12 +35,13 @@ def generate():
         yield f"Line {i}\n"
 
 
-@res.get("/stream")
+
+@router.get("/stream")
 def stream():
     return StreamingResponse(generate(), media_type="plain/text")
 
 
-@res.get("/file")
+@router.get("/file")
 def file():
     # display pdf in browser
     # FileResponse(path="Fastapi.pdf",filename="atul.pdf")
@@ -53,7 +54,8 @@ class SuccessResponse(JSONResponse):
         super().__init__(content={"success": True, "data": data})
 
 
-@res.get("/custom")
+
+@router.get("/custom")
 def custome():
     return SuccessResponse({"name": "Atul"})
 

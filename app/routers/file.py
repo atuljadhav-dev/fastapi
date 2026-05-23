@@ -3,10 +3,10 @@ import shutil
 import os
 
 # need package: pip install python-multipart
-files = APIRouter()
+router = APIRouter()
 
 
-@files.post("/upload")
+@router.post("/upload")
 async def upload_file(name: str = Form(...), file: UploadFile = File(...)):
     content = await file.read()  # read the content of the uploaded file
     return {
@@ -17,7 +17,7 @@ async def upload_file(name: str = Form(...), file: UploadFile = File(...)):
     }
 
 
-@files.post("/upload-multiple")
+@router.post("/upload-multiple")
 async def upload_multiple_files(files: list[UploadFile] = File(...)):
     if len(files) > 5:
         raise HTTPException(
@@ -29,14 +29,14 @@ async def upload_multiple_files(files: list[UploadFile] = File(...)):
     return {"files": filenames}
 
 
-@files.post("/upload-save")
+@router.post("/upload-save")
 async def upload_file_save(file: UploadFile = File(...)):
     with open(f"uploaded_{file.filename}", "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     return {"message": f"File '{file.filename}' saved successfully."}
 
 
-@files.post("/validate-upload")
+@router.post("/validate-upload")
 async def validate_upload(file: UploadFile = File(...)):
     extension = os.path.splitext(file.filename)[1].lower()
     if extension not in [".txt", ".pdf"]:
