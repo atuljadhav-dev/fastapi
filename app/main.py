@@ -1,10 +1,13 @@
-from fastapi import FastAPI, status, Depends
+from fastapi import FastAPI, status, Depends, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 from app.routers.response_model import router as response_router
 from app.routers.cookies import router as cookie_router
 from app.routers.headers import router as head_router
 from app.routers.file import router as files_router
 from app.routers.dependency import router as dep_router
+from app.routers.exception import router as exception_router, UserNotFoundException
 
 from app.schemas.UserResponse import UserResponse
 from app.schemas.User import User
@@ -25,6 +28,7 @@ app.include_router(
 app.include_router(cookie_router, prefix="/auth", tags=["Cookie"])
 app.include_router(head_router, prefix="/header", tags=["Header"])
 app.include_router(files_router, prefix="/file", tags=["File"])
+app.include_router(exception_router, prefix="/exception", tags=["Exception"])
 
 
 #! uvicorn app.main:app --reload
@@ -72,3 +76,29 @@ def create_user(user: User):
 # Store session-related data in secure, HTTP-only cookies when appropriate.
 # Add type hints to all parameters so FastAPI can validate them automatically.
 # Avoid putting sensitive information such as passwords or API keys in URLs, since URLs are commonly logged and cached
+
+
+@app.exception_handler(UserNotFoundException)
+async def user_not_found_exception_handler(
+    request: Request, exc: UserNotFoundException
+):
+    '''Custom exception handler for UserNotFoundException. Returns a 404 response with a message indicating that the user was not found.'''
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"message": f"User with ID {exc.user_id} not found."},
+    )
+
+
+@app.exception_handler(Exception)
+async def global_handler(request: Request, exc: Exception):
+    '''Global exception handler for all unhandled exceptions. Returns a 500 response with a generic error message.'''
+    return JSONResponse(status_code=500, content={"message": "Internal Server Error"})
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_handler(request: Request, exc: RequestValidationError):
+    '''Exception handler for request validation errors. Returns a 422 response with details about the validation errors.'''
+    return JSONResponse(
+        status_code=422,
+        content={"message": "Validation Failed", "errors": exc.errors()},
+    )
