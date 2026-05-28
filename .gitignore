@@ -4,3 +4,4 @@ __pycache__/
 .env
 k.txt
 fastapi.pdf
+app.db

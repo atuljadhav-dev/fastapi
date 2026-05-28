@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, BaseModel, Field, EmailStr, HttpUrl, field_validator, model_validator, ConfigDict
+from pydantic import  BaseModel, Field, EmailStr, HttpUrl, field_validator, model_validator
 
 
 class Address(BaseModel):

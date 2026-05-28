@@ -8,6 +8,7 @@ from app.routers.headers import router as head_router
 from app.routers.file import router as files_router
 from app.routers.dependency import router as dep_router
 from app.routers.exception import router as exception_router, UserNotFoundException
+from app.routers.databse import router as database_router
 
 from app.schemas.UserResponse import UserResponse
 from app.schemas.User import User
@@ -29,6 +30,7 @@ app.include_router(cookie_router, prefix="/auth", tags=["Cookie"])
 app.include_router(head_router, prefix="/header", tags=["Header"])
 app.include_router(files_router, prefix="/file", tags=["File"])
 app.include_router(exception_router, prefix="/exception", tags=["Exception"])
+app.include_router(database_router)
 
 
 #! uvicorn app.main:app --reload
